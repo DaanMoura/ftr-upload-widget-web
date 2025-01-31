@@ -1,6 +1,12 @@
 @import "tailwindcss";
 @config "../tailwind.config.ts";
 
+@property --border-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
 .lucide {
   width: 1rem;
   height: 1rem;
