@@ -18,7 +18,10 @@ export const UploadWidgetUploadItem = ({ upload }: UploadWidgetUploadItemProps) 
   const { cancelUpload } = useUploads()
 
   const progress = useMemo(
-    () => calculateProgress(upload.uploadSizeInBytes, upload.originalSizeInBytes),
+    () =>
+      upload.compressedSizeInBytes
+        ? calculateProgress(upload.uploadSizeInBytes, upload.compressedSizeInBytes)
+        : 0,
     [upload]
   )
 
@@ -43,7 +46,7 @@ export const UploadWidgetUploadItem = ({ upload }: UploadWidgetUploadItemProps) 
           <span className="line-through">{formatBytes(upload.originalSizeInBytes)}</span>
           <CircleSeparator />
           <span>
-            300KB
+            {formatBytes(upload.compressedSizeInBytes ?? upload.uploadSizeInBytes)}
             <span className="text-green-400 ml-1">-94%</span>
           </span>
           <CircleSeparator />

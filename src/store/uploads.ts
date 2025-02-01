@@ -47,6 +47,8 @@ export const useUploads = create<UploadsState, [['zustand/immer', never]]>(
         return
       }
 
+      updateUpload(uploadId, { compressedSizeInBytes: compressedFile.size })
+
       const [error] = await uploadFileToStorage(
         {
           file: compressedFile,
@@ -123,8 +125,10 @@ export const usePendingUploads = () => {
 
       const { total, uploaded } = Array.from(store.uploads.values()).reduce(
         (acc, upload) => {
-          acc.total += upload.originalSizeInBytes
-          acc.uploaded += upload.uploadSizeInBytes
+          if (upload.compressedSizeInBytes) {
+            acc.total += upload.compressedSizeInBytes
+            acc.uploaded += upload.uploadSizeInBytes
+          }
 
           return acc
         },

@@ -41,13 +41,13 @@ export const compressImage = async ({
 
         if (width > height) {
           if (width > maxWidth) {
-            width = maxWidth
             height *= maxWidth / width
+            width = maxWidth
           }
         } else {
           if (height > maxHeight) {
-            height = maxHeight
             width *= maxHeight / height
+            height = maxHeight
           }
         }
 

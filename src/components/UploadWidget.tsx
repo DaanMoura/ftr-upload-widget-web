@@ -5,18 +5,32 @@ import { UploadWidgetDropzone } from './UploadWidgetDropzone'
 import { UploadWidgetHeader } from './UploadWidgetHeader'
 import { UploadWidgetUploadList } from './UploadWidgetUploadList'
 import { UploadWidgetMinimizedButton } from './UploadWidgetMinimizedButton'
-import { usePendingUploads } from '../store/uploads'
+import { usePendingUploads, useUploads } from '../store/uploads'
+import { useEffect, useRef, useState } from 'react'
 
 const TRANSITION_DURATION = 0.15
 
 export const UploadWidget = () => {
+  const { uploads } = useUploads()
+
   const { isThereAnyPendingUploads } = usePendingUploads()
 
   const [isWidgetOpen, toggleWidgetOpen] = useCycle(false, true)
 
+  const [contentHeight, setContentHeight] = useState(0)
+  const contentRef = useRef<HTMLDivElement>(null)
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: it should react to isWidgetOpen and uploads
+  useEffect(() => {
+    if (contentRef.current) {
+      setContentHeight(contentRef.current.scrollHeight)
+    }
+  }, [isWidgetOpen, uploads])
+
   return (
     <Collapsible.Root onOpenChange={() => toggleWidgetOpen()} asChild>
       <motion.div
+        ref={contentRef}
         data-progress={isThereAnyPendingUploads}
         className="bg-zinc-900 w-[360px] overflow-hidden rounded-xl 
           data-[state=open]:shadow-shape border border-transparent animate-border 
@@ -34,7 +48,7 @@ export const UploadWidget = () => {
           },
           open: {
             width: 360,
-            height: 'auto',
+            height: contentHeight,
             transition: {
               duration: TRANSITION_DURATION
             }
