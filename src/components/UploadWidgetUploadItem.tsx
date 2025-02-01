@@ -25,6 +25,25 @@ export const UploadWidgetUploadItem = ({ upload }: UploadWidgetUploadItemProps) 
     [upload]
   )
 
+  const onDownloadClick = useCallback(async () => {
+    if (upload.remoteUrl) {
+      try {
+        const response = await fetch(upload.remoteUrl)
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = upload.name
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      } catch (error) {
+        console.error('Download failed', error)
+      }
+    }
+  }, [upload])
+
   const onCopyClick = useCallback(() => {
     if (!upload.remoteUrl) return
     navigator.clipboard.writeText(upload.remoteUrl)
@@ -52,7 +71,16 @@ export const UploadWidgetUploadItem = ({ upload }: UploadWidgetUploadItemProps) 
           <CircleSeparator />
           <span>
             {formatBytes(upload.compressedSizeInBytes ?? upload.uploadSizeInBytes)}
-            <span className="text-green-400 ml-1">-94%</span>
+            {upload.compressedSizeInBytes && (
+              <span className="text-green-400 ml-1">
+                -
+                {calculateProgress(
+                  upload.originalSizeInBytes - (upload.compressedSizeInBytes ?? 0),
+                  upload.originalSizeInBytes
+                )}
+                %
+              </span>
+            )}
           </span>
           <CircleSeparator />
 
@@ -76,7 +104,7 @@ export const UploadWidgetUploadItem = ({ upload }: UploadWidgetUploadItemProps) 
       </Progress.Root>
 
       <div className="absolute top-2.5 right-2.5 flex items-center gap-1">
-        <Button size="icon-sm" disabled={upload.status !== 'success'}>
+        <Button size="icon-sm" aria-disabled={!upload.remoteUrl} onClick={onDownloadClick}>
           <Download />
           <span className="sr-only">Download compressed image</span>
         </Button>
