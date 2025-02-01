@@ -5,7 +5,7 @@ import { Button } from './ui/Button'
 import { formatBytes } from '../utils/format-bytes'
 import type { Upload } from '../types/upload'
 import { useUploads } from '../store/uploads'
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { calculateProgress } from '../utils/progress'
 
 const CircleSeparator = () => <div className="size-1 rounded-full mb-0.5 bg-zinc-700" />
@@ -24,6 +24,11 @@ export const UploadWidgetUploadItem = ({ upload }: UploadWidgetUploadItemProps) 
         : 0,
     [upload]
   )
+
+  const onCopyClick = useCallback(() => {
+    if (!upload.remoteUrl) return
+    navigator.clipboard.writeText(upload.remoteUrl)
+  }, [upload])
 
   return (
     <motion.div
@@ -76,7 +81,7 @@ export const UploadWidgetUploadItem = ({ upload }: UploadWidgetUploadItemProps) 
           <span className="sr-only">Download compressed image</span>
         </Button>
 
-        <Button disabled={upload.status !== 'success'} size="icon-sm">
+        <Button disabled={!upload.remoteUrl} onClick={onCopyClick} size="icon-sm">
           <Link2 />
           <span className="sr-only">Copy remote URL</span>
         </Button>

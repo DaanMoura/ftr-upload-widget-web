@@ -9,4 +9,5 @@ export type Upload = {
   originalSizeInBytes: number
   compressedSizeInBytes?: number
   uploadSizeInBytes: number
+  remoteUrl?: string
 }
