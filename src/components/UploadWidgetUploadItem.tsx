@@ -2,10 +2,16 @@ import * as Progress from '@radix-ui/react-progress'
 import { motion } from 'motion/react'
 import { Download, ImageUp, Link2, RefreshCcw, X } from 'lucide-react'
 import { Button } from './ui/Button'
+import { formatBytes } from '../utils/format-bytes'
+import type { Upload } from '../types/upload'
 
 const CircleSeparator = () => <div className="size-1 rounded-full mb-0.5 bg-zinc-700" />
 
-export const UploadWidgetUploadItem = () => {
+interface UploadWidgetUploadItemProps {
+  upload: Upload
+}
+
+export const UploadWidgetUploadItem = ({ upload }: UploadWidgetUploadItemProps) => {
   return (
     <motion.div
       // initial={{ scale: 0.6 }}
@@ -20,11 +26,11 @@ export const UploadWidgetUploadItem = () => {
       <div className="flex flex-col gap-1">
         <span className="text-xs font-medium flex items-center gap-1">
           <ImageUp className="size-3 text-zinc-300" />
-          <span>screenshot.png</span>
+          <span>{upload.name}</span>
         </span>
 
         <span className="text-xxs text-zinc-400 flex gap-1.5 items-center">
-          <span className="line-through">3MB</span>
+          <span className="line-through">{formatBytes(upload.file.size)}</span>
           <CircleSeparator />
           <span>
             300KB
