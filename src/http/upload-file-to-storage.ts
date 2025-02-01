@@ -7,13 +7,18 @@ interface UploadFileToStorageParams {
   file: File
 }
 
+interface UploadFileToStorageOptions {
+  signal?: AbortSignal
+}
+
 interface UploadResponse {
   url: string
 }
 
-export const uploadFileToStorage = async ({
-  file
-}: UploadFileToStorageParams): Promise<ErrorGuard<UploadResponse>> => {
+export const uploadFileToStorage = async (
+  { file }: UploadFileToStorageParams,
+  opts?: UploadFileToStorageOptions
+): Promise<ErrorGuard<UploadResponse>> => {
   const data = new FormData()
   data.append('file', file)
 
@@ -21,7 +26,8 @@ export const uploadFileToStorage = async ({
     const response = await axios.post<{ url: string }>(API_URL + '/uploads', data, {
       headers: {
         'Content-Type': 'multipart/form-data'
-      }
+      },
+      signal: opts?.signal
     })
 
     return [undefined, { url: response.data.url }]
