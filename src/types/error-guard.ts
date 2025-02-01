@@ -1,1 +1,1 @@
-export type ErrorGuard<T = unknown> = [Error | unknown, undefined] | [undefined, T]
+export type ErrorGuard<T = unknown> = [Error | never, undefined] | [undefined, T]

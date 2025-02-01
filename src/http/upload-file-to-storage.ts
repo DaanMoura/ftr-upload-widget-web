@@ -36,6 +36,6 @@ export const uploadFileToStorage = async (
 
     return [undefined, { url: response.data.url }]
   } catch (error) {
-    return [error, undefined]
+    return [error as never, undefined]
   }
 }

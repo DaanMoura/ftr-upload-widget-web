@@ -6,6 +6,7 @@ import { uploadFileToStorage } from '../http/upload-file-to-storage'
 import { CanceledError } from 'axios'
 import { calculateProgress } from '../utils/progress'
 import { useShallow } from 'zustand/shallow'
+import { compressImage } from '../utils/compress-image'
 
 type UploadsState = {
   uploads: Map<string, Upload>
@@ -34,9 +35,21 @@ export const useUploads = create<UploadsState, [['zustand/immer', never]]>(
       const upload = get().uploads.get(uploadId)
       if (!upload) return
 
+      const [compressError, compressedFile] = await compressImage({
+        file: upload.file,
+        maxWidth: 200,
+        maxHeight: 200,
+        quality: 0.5
+      })
+
+      if (compressError) {
+        updateUpload(uploadId, { status: 'error' })
+        return
+      }
+
       const [error] = await uploadFileToStorage(
         {
-          file: upload.file,
+          file: compressedFile,
           onProgress: sizeInBytes => {
             updateUpload(uploadId, { uploadSizeInBytes: sizeInBytes })
           }
