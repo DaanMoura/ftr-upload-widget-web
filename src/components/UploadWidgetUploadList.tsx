@@ -10,7 +10,7 @@ export const UploadWidgetUploadList = () => {
     <div className="px-3 flex flex-col gap-3">
       {!isUploadListEmpty && (
         <span className="text-xs font-medium">
-          Uploaded files <span className="text-zinc-400">({uploads.size})</span>
+          Uploaded files <span className="text-zinc-400 tabular-nums">({uploads.size})</span>
         </span>
       )}
 

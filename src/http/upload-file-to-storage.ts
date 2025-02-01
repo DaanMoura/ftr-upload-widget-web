@@ -5,6 +5,7 @@ const API_URL = 'http://localhost:3333'
 
 interface UploadFileToStorageParams {
   file: File
+  onProgress: (sizeInBytes: number) => void
 }
 
 interface UploadFileToStorageOptions {
@@ -16,7 +17,7 @@ interface UploadResponse {
 }
 
 export const uploadFileToStorage = async (
-  { file }: UploadFileToStorageParams,
+  { file, onProgress }: UploadFileToStorageParams,
   opts?: UploadFileToStorageOptions
 ): Promise<ErrorGuard<UploadResponse>> => {
   const data = new FormData()
@@ -27,7 +28,10 @@ export const uploadFileToStorage = async (
       headers: {
         'Content-Type': 'multipart/form-data'
       },
-      signal: opts?.signal
+      signal: opts?.signal,
+      onUploadProgress: progressEvent => {
+        onProgress(progressEvent.loaded)
+      }
     })
 
     return [undefined, { url: response.data.url }]

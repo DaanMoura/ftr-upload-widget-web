@@ -5,6 +5,8 @@ import { Button } from './ui/Button'
 import { formatBytes } from '../utils/format-bytes'
 import type { Upload } from '../types/upload'
 import { useUploads } from '../store/uploads'
+import { useMemo } from 'react'
+import { calculateProgress } from '../utils/progress'
 
 const CircleSeparator = () => <div className="size-1 rounded-full mb-0.5 bg-zinc-700" />
 
@@ -14,6 +16,11 @@ interface UploadWidgetUploadItemProps {
 
 export const UploadWidgetUploadItem = ({ upload }: UploadWidgetUploadItemProps) => {
   const { cancelUpload } = useUploads()
+
+  const progress = useMemo(
+    () => calculateProgress(upload.uploadSizeInBytes, upload.originalSizeInBytes),
+    [upload]
+  )
 
   return (
     <motion.div
@@ -27,13 +34,13 @@ export const UploadWidgetUploadItem = ({ upload }: UploadWidgetUploadItemProps) 
       className="px-3 py-2 rounded-lg flex flex-col gap-3 shadow-shape-content bg-white/2 relative overflow-hidden"
     >
       <div className="flex flex-col gap-1">
-        <span className="text-xs font-medium flex items-center gap-1">
+        <span className="text-xs font-medium flex items-center gap-1 max-w-[200px]">
           <ImageUp className="size-3 text-zinc-300" />
           <span>{upload.name}</span>
         </span>
 
         <span className="text-xxs text-zinc-400 flex gap-1.5 items-center">
-          <span className="line-through">{formatBytes(upload.file.size)}</span>
+          <span className="line-through">{formatBytes(upload.originalSizeInBytes)}</span>
           <CircleSeparator />
           <span>
             300KB
@@ -42,19 +49,21 @@ export const UploadWidgetUploadItem = ({ upload }: UploadWidgetUploadItemProps) 
           <CircleSeparator />
 
           {upload.status === 'success' && <span>100%</span>}
-          {upload.status === 'progress' && <span>45%</span>}
+          {upload.status === 'progress' && <span className="tabular-nums">{progress}%</span>}
           {upload.status === 'error' && <span className="text-red-400">Error</span>}
           {upload.status === 'canceled' && <span className="text-amber-400">Canceled</span>}
         </span>
       </div>
 
       <Progress.Root
+        value={upload.status === 'progress' ? progress : 100}
         data-status={upload.status}
         className="group bg-zinc-800 rounded full h-1 overflow-hidden"
       >
         <Progress.Indicator
-          className="bg-indigo-500 h-1 group-data-[status=success]:bg-green-400 group-data-[status=error]:bg-red-400 group-data-[status=canceled]:bg-amber-400"
-          style={{ width: upload.status === 'progress' ? '45%' : '100%' }}
+          className="bg-indigo-500 h-1 transition-all group-data-[status=success]:bg-green-400 
+          group-data-[status=error]:bg-red-400 group-data-[status=canceled]:bg-amber-400"
+          style={{ width: upload.status === 'progress' ? `${progress}%` : '100%' }}
         />
       </Progress.Root>
 

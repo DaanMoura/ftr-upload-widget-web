@@ -47,7 +47,7 @@ const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
         />
       </svg>
       <div
-        className={`absolute inset-0 flex items-center justify-center text-xs font-medium text-zinc-50`}
+        className={`absolute inset-0 flex items-center justify-center text-xs font-medium text-zinc-50 tabular-nums`}
       >
         {progress}
         <span className="text-xxs text-zinc-400">%</span>

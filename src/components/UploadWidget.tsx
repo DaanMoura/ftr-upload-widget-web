@@ -5,18 +5,19 @@ import { UploadWidgetDropzone } from './UploadWidgetDropzone'
 import { UploadWidgetHeader } from './UploadWidgetHeader'
 import { UploadWidgetUploadList } from './UploadWidgetUploadList'
 import { UploadWidgetMinimizedButton } from './UploadWidgetMinimizedButton'
+import { usePendingUploads } from '../store/uploads'
 
 const TRANSITION_DURATION = 0.15
 
 export const UploadWidget = () => {
-  const isThereAnyPendingUpload = true
+  const { isThereAnyPendingUploads } = usePendingUploads()
 
   const [isWidgetOpen, toggleWidgetOpen] = useCycle(false, true)
 
   return (
     <Collapsible.Root onOpenChange={() => toggleWidgetOpen()} asChild>
       <motion.div
-        data-progress={isThereAnyPendingUpload}
+        data-progress={isThereAnyPendingUploads}
         className="bg-zinc-900 w-[360px] overflow-hidden rounded-xl 
           data-[state=open]:shadow-shape border border-transparent animate-border 
           data-[state=closed]:rounded-3xl data-[state=closed]:data-[progress=false]:shadow-shape
