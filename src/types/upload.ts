@@ -5,7 +5,7 @@ export type Upload = {
   name: string
   file: File
   status: UploadStatus
-  abortController: AbortController
+  abortController?: AbortController
   originalSizeInBytes: number
   compressedSizeInBytes?: number
   uploadSizeInBytes: number

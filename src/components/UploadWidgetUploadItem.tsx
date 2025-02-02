@@ -7,6 +7,7 @@ import type { Upload } from '../types/upload'
 import { useUploads } from '../store/uploads'
 import { useCallback, useMemo } from 'react'
 import { calculateProgress } from '../utils/progress'
+import { downloadUrl } from '../utils/download-url'
 
 const CircleSeparator = () => <div className="size-1 rounded-full mb-0.5 bg-zinc-700" />
 
@@ -15,7 +16,8 @@ interface UploadWidgetUploadItemProps {
 }
 
 export const UploadWidgetUploadItem = ({ upload }: UploadWidgetUploadItemProps) => {
-  const { cancelUpload } = useUploads()
+  const cancelUpload = useUploads(state => state.cancelUpload)
+  const retryUpload = useUploads(state => state.retryUpload)
 
   const progress = useMemo(
     () =>
@@ -26,22 +28,8 @@ export const UploadWidgetUploadItem = ({ upload }: UploadWidgetUploadItemProps) 
   )
 
   const onDownloadClick = useCallback(async () => {
-    if (upload.remoteUrl) {
-      try {
-        const response = await fetch(upload.remoteUrl)
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        link.download = upload.name
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        window.URL.revokeObjectURL(url)
-      } catch (error) {
-        console.error('Download failed', error)
-      }
-    }
+    if (!upload.remoteUrl) return
+    downloadUrl(upload.remoteUrl)
   }, [upload])
 
   const onCopyClick = useCallback(() => {
@@ -103,7 +91,7 @@ export const UploadWidgetUploadItem = ({ upload }: UploadWidgetUploadItemProps) 
         />
       </Progress.Root>
 
-      <div className="absolute top-2.5 right-2.5 flex items-center gap-1">
+      <div className="absolute top-2 right-2 flex items-center gap-1">
         <Button size="icon-sm" aria-disabled={!upload.remoteUrl} onClick={onDownloadClick}>
           <Download />
           <span className="sr-only">Download compressed image</span>
@@ -114,7 +102,11 @@ export const UploadWidgetUploadItem = ({ upload }: UploadWidgetUploadItemProps) 
           <span className="sr-only">Copy remote URL</span>
         </Button>
 
-        <Button disabled={!['canceled', 'error'].includes(upload.status)} size="icon-sm">
+        <Button
+          disabled={!['canceled', 'error'].includes(upload.status)}
+          onClick={() => retryUpload(upload.id)}
+          size="icon-sm"
+        >
           <RefreshCcw />
           <span className="sr-only">Retry upload</span>
         </Button>

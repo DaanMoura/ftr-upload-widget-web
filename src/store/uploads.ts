@@ -12,7 +12,7 @@ type UploadsState = {
   uploads: Map<string, Upload>
   addUploads: (files: File[]) => void
   cancelUpload: (uploadId: string) => void
-  processUpload: (uploadId: string) => Promise<void>
+  retryUpload: (uploadId: string) => void
 }
 
 enableMapSet()
@@ -35,6 +35,16 @@ export const useUploads = create<UploadsState, [['zustand/immer', never]]>(
       const upload = get().uploads.get(uploadId)
       if (!upload) return
 
+      const abortController = new AbortController()
+
+      updateUpload(uploadId, {
+        uploadSizeInBytes: 0,
+        compressedSizeInBytes: undefined,
+        remoteUrl: undefined,
+        status: 'progress',
+        abortController
+      })
+
       const [compressError, compressedFile] = await compressImage({
         file: upload.file,
         maxWidth: 1000,
@@ -56,7 +66,7 @@ export const useUploads = create<UploadsState, [['zustand/immer', never]]>(
             updateUpload(uploadId, { uploadSizeInBytes: sizeInBytes })
           }
         },
-        { signal: upload.abortController.signal }
+        { signal: abortController.signal }
       )
 
       let status: UploadStatus = 'success'
@@ -74,14 +84,12 @@ export const useUploads = create<UploadsState, [['zustand/immer', never]]>(
     const addUploads = (files: File[]) => {
       for (const file of files) {
         const uploadId = crypto.randomUUID()
-        const abortController = new AbortController()
 
         const upload: Upload = {
           id: uploadId,
           name: file.name,
           file,
           status: 'progress',
-          abortController,
           originalSizeInBytes: file.size,
           uploadSizeInBytes: 0
         }
@@ -98,14 +106,18 @@ export const useUploads = create<UploadsState, [['zustand/immer', never]]>(
       const upload = get().uploads.get(uploadId)
       if (!upload) return
 
-      upload.abortController.abort()
+      upload.abortController?.abort()
+    }
+
+    const retryUpload = (uploadId: string) => {
+      processUpload(uploadId)
     }
 
     return {
       uploads: new Map(),
       addUploads,
-      processUpload,
-      cancelUpload
+      cancelUpload,
+      retryUpload
     }
   })
 )
